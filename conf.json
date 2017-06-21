@@ -1,0 +1,7 @@
+{
+  "proxy:conf": {
+    "fiwareIP": "http://192.168.0.76:1026",
+    "yellowTurtleIP" : "http://127.0.0.1:7579",
+    "notificationURL" : "http://localhost:62590"
+  }
+}
