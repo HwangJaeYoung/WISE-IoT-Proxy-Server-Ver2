@@ -68,18 +68,19 @@ fs.readFile('conf.json', 'utf-8', function (err, data) {
 // Device information from MMG management system
 app.post('/MMGDeviceInfoEndpoint', function(request, response) {
 
-    console.log(request.body);
-
     var selectedDevices = request.body['FiwareDevices']; // Root
     var deviceInfo = selectedDevices.deviceInfo;
     var deviceCount = Object.keys(deviceInfo).length;
 
-    // Changing ContextBrokerIP and oneM2M ServerIP
+    // Changing ContextBrokerIP, oneM2M ServerIP, notificationURL
     if(selectedDevices.fiwareIPAddr)
         fiwareIP = selectedDevices.fiwareIPAddr;
 
-    if(selectedDevices.mobiusServerAddr)
+    if(selectedDevices.mobiusServerIPAddr)
         yellowTurtleIP = selectedDevices.mobiusServerIPAddr;
+
+    if(selectedDevices.notificationIPAddr)
+        notificationURL = selectedDevices.notificationIPAddr;
 
     var fiwareDeviceInfo = new Entity( ); // Device information container
 
@@ -93,18 +94,91 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
         // Get Fiware device information
         function(callbackForOneM2M){
             fiwareController.executeQueryEntity(fiwareDeviceInfo, function (requestResult, statusCode, detailFiwareDeviceInfo) {
-
-                console.log(JSON.stringify(detailFiwareDeviceInfo));
-
                 if (requestResult) { // success (true)
                     callbackForOneM2M(null, detailFiwareDeviceInfo);
                 } else { // fail (false)
                     callbackForOneM2M(statusCode, null);
                 }
             });
-        }// Fiware resource retrieve
+        }, // Fiware resource retrieve
 
-        /* Spot Container creation, Status Container creation, Info Container creation */
+        // oneM2M Resource registration and subscription
+        function(detailFiwareDeviceInfo, resultCallback) {
+
+            var count = 0;
+            var selectedDevices = detailFiwareDeviceInfo['FiwareDevices']; // Root
+            var deviceInfo = selectedDevices.deviceInfo;
+            var deviceLists = Object.keys(deviceInfo).length;
+
+            async.whilst(
+                function () {
+                    return count < deviceLists;
+                },
+                function (async_for_loop_callback) {
+
+                    // Resource registration procedures (Spot → Status → Info → Subscription)
+                    async.waterfall([
+                        // Spot container registration
+                        function(CallbackForContainerRegistration){
+                            oneM2MController.registrationContainer(count, detailFiwareDeviceInfo, function (requestResult, statusCode) {
+                                if(requestResult) { // Spot container registration success
+                                    CallbackForContainerRegistration(null, detailFiwareDeviceInfo);
+                                } else { // Spot container registration fail
+                                    CallbackForContainerRegistration(statusCode, null);
+                                }
+                            });
+                        },
+
+                        // Container: status, info / contentInstance: status, info registration
+                        function(detailFiwareDeviceInfo, CallbackForConCinRegistration) {
+                            oneM2MController.registrationConCin(count, detailFiwareDeviceInfo, function (requestResult, statusCode) {
+                                if(requestResult) {
+                                    CallbackForConCinRegistration(null, detailFiwareDeviceInfo);
+                                } else {
+                                    CallbackForConCinRegistration(statusCode, null);
+                                }
+                            });
+                        },
+
+                        // ContextBroker subscription
+                        function(detailFiwareDeviceInfo, CallbackForSubscriptionRegistration) {
+                            fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
+                                if(requestResult) { // Subscription Registration success
+
+                                    fs.appendFile('subscriptionList.txt', subscriptionID, function (err) {
+                                        if (err)
+                                            console.log('FATAL An error occurred trying to write in the file: ' + err);
+                                        else
+                                            console.log('SubscriptionID is stored in subscriptionList.txt');
+                                    });
+
+                                    CallbackForSubscriptionRegistration(null);
+                                } else { // Subscription Registration fail
+                                    CallbackForSubscriptionRegistration(statusCode, null);
+                                }
+                            })
+                        }
+                    ], function (statusCode, result) { // response to client such as web or postman
+                        if(statusCode) { // AE → Container → contentInstance → Subscription (fail)
+                            if(statusCode == 409) { // AE Registration Conflict
+                                count++; async_for_loop_callback();
+                            } else {
+                                async_for_loop_callback(statusCode); // fail
+                            }
+                        } else { // AE → Container → contentInstance → Subscription (success)
+                            count++; async_for_loop_callback();
+                        }
+                    }); // async.waterfall
+                },
+                function (statusCode, n) {
+                    if(statusCode) {
+                        resultCallback(statusCode); // fail
+                    } else {
+                        resultCallback(201); // success
+                    }
+                }
+            );
+        } // oneM2M Registration function
     ], function (statusCode, result) { // response to client such as web or postman
         console.log(statusCodeMessage.statusCodeGenerator((statusCode)));
         response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
@@ -127,7 +201,7 @@ app.get('/', function (request, response) {
 var serverStartFunction = function( ) {
     // Server start!!
     app.listen(62590, function () {
-        console.log('Server running at http://127.0.0.1:62590');
+        console.log('Server running at http://localhost:62590');
     });
 };
 

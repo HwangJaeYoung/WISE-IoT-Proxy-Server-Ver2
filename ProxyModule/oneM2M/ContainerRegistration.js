@@ -6,15 +6,15 @@
 var requestToAnotherServer = require('request');
 var bodyGenerator = require('../Domain/BodyGenerator');
 
-var RegistrationExecution = function (AEName, containerName, metadataName, callBackForResponse) {
+var RegistrationExecution = function (containerName, callBackForResponse) {
 
     var targetURL = '', bodyObject = null;
 
     if(metadataName) { // Double Container format
-        targetURL = yellowTurtleIP + '/mobius-yt/' + AEName + '/' + containerName;
+        targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot' + AEName + '/' + containerName;
         bodyObject = bodyGenerator.ContainerBodyGenerator(metadataName);
     } else { // General Container format
-        targetURL = yellowTurtleIP + '/mobius-yt/' + AEName;
+        targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot' + containerName;
         bodyObject = bodyGenerator.ContainerBodyGenerator(containerName);
     }
 
@@ -48,6 +48,6 @@ var RegistrationExecution = function (AEName, containerName, metadataName, callB
     });
 };
 
-exports.ContainerRegistrationExecution = function(AEName, containerName, metadataName, callBackForResponse) {
-    RegistrationExecution(AEName, containerName, metadataName, callBackForResponse);
+exports.ContainerRegistrationExecution = function(containerName, callBackForResponse) {
+    RegistrationExecution(containerName, callBackForResponse);
 };

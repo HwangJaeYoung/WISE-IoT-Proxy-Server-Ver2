@@ -5,20 +5,18 @@
 
 // extract the modules
 var async = require('async');
-var AERegistration = require('./oneM2M/AERegistration');
 var containerRegistration = require('./oneM2M/ContainerRegistration');
 var contentInstanceRegistration = require('./oneM2M/contentInsatnceRegistration');
 
-var executeRegistrationAE = function(count, fiwareInformation, oneM2MControllerCallback){
+var executeRegistrationContainer = function(count, fiwareInformation, oneM2MControllerCallback){
 
     var selectedDevices = fiwareInformation['FiwareDevices']; // Root
     var deviceInfo = selectedDevices.deviceInfo;
 
     // Creating AE name using Entity Name and Entity Type.
-    var AEName = deviceInfo[Object.keys(deviceInfo)[count]].entityName + ":" + deviceInfo[Object.keys(deviceInfo)[count]].entityType;
+    var parkingSpotContainerName = deviceInfo[Object.keys(deviceInfo)[count]].entityName;
 
-    AERegistration.CallAERegistrationFunction(AEName, function (statusCode) {
-
+    containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, function (statusCode) {
         if(statusCode == 201)
             oneM2MControllerCallback(true, statusCode);
         else
@@ -34,13 +32,6 @@ var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControl
     var deviceInfo = selectedDevices.deviceInfo;
     var deviceKey = [Object.keys(deviceInfo)[count]]; // device1, device2, ... , deviceN
     var device = deviceInfo[deviceKey];
-
-    // Getting device attributes such as entityName, temperature, pressure and so on.
-    var attributeKey = Object.keys(device);
-    var attributeCount = attributeKey.length;
-
-    // Creating AE name using Entity Name and Entity Type.
-    var AEName = device.entityName + ":" + device.entityType;
 
     async.whilst(
         function () {
@@ -272,8 +263,8 @@ var fiwareDeviceUpdateForOneM2M = function(fiwareInformation, oneM2MControllerCa
     ); // End of async.whilist
 };
 
-exports.registrationAE = function(count, fiwareInformation, oneM2MControllerCallback) {
-    executeRegistrationAE(count, fiwareInformation, oneM2MControllerCallback);
+exports.registrationContainer = function(count, fiwareInformation, oneM2MControllerCallback) {
+    executeRegistrationContainer(count, fiwareInformation, oneM2MControllerCallback);
 };
 
 exports.registrationConCin = function (count, fiwareInformation, oneM2MControllerCallback) {
