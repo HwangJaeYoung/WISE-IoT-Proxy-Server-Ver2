@@ -16,7 +16,7 @@ var executeRegistrationContainer = function(count, fiwareInformation, oneM2MCont
     // Creating AE name using Entity Name and Entity Type.
     var parkingSpotContainerName = deviceInfo[Object.keys(deviceInfo)[count]].entityName;
 
-    containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, function (statusCode) {
+    containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, null, function (statusCode) {
         if(statusCode == 201)
             oneM2MControllerCallback(true, statusCode);
         else
@@ -26,102 +26,57 @@ var executeRegistrationContainer = function(count, fiwareInformation, oneM2MCont
 
 var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControllerCallback) {
 
-    var attrCount = 0;
-
     var selectedDevices = fiwareInformation['FiwareDevices']; // Root
     var deviceInfo = selectedDevices.deviceInfo;
     var deviceKey = [Object.keys(deviceInfo)[count]]; // device1, device2, ... , deviceN
     var device = deviceInfo[deviceKey];
 
-    async.whilst(
-        function () {
-            return attrCount < attributeCount;
+    var parkingSpotContainerName = deviceInfo[Object.keys(deviceInfo)[count]].entityName;
+
+    async.waterfall([
+        // status container registration
+        function(CallbackForContainerRegistration){
+            containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, 'status', function (statusCode) {
+                if(statusCode == 201)
+                    CallbackForContainerRegistration(null);
+                else
+                    CallbackForContainerRegistration(statusCode, null);
+            });
         },
 
-        function (async_for_loop_callback) {
+        // info container registration
+        function(CallbackForContainerRegistration) {
+            containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, 'info', function (statusCode) {
+                if(statusCode == 201)
+                    CallbackForContainerRegistration(null);
+                else
+                    CallbackForContainerRegistration(statusCode, null);
+            });
+        },
 
-            if ((attributeKey[attrCount] == 'entityName' || attributeKey[attrCount] == 'entityType') == false) {
-                async.waterfall([
-                    // Container Registration
-                    function (callbackForOneM2M) {
-                        var containerName = attributeKey[attrCount]; // Container Name
-                        containerRegistration.ContainerRegistrationExecution(AEName, containerName, null, function (statusCode) {
-                            if(statusCode == 201)
-                                callbackForOneM2M(null);
-                            else
-                                callbackForOneM2M(statusCode, null);
-                        });
-                    },
+        // contentsInstance registration for spot and info container
+        function(CallbackForConCinRegistration) {
 
-                    // If attributes have metadata...
-                    function (callbackForOneM2M) {
-                        var metadataCount = 0;
-                        var metadataSet = device[attributeKey[attrCount]].metadata;
-                        var metadataKey = Object.keys(metadataSet);
+            var attrCount = 0;
 
-                        async.whilst(
-                            function () { return metadataCount < metadataKey.length; },
+            // Getting device attributes such as entityName, temperature, pressure and so on.
+            var attributeKey = Object.keys(device);
+            var attributeCount = attributeKey.length;
 
-                            // Creating metadata resource using double Container structure
-                            function (async_for_loop_callback) {
-                                async.waterfall([
+            async.whilst(
+                function () { return attrCount < attributeCount },
 
-                                    // Creating Container resource for metadata
-                                    function(callbackForOneM2M) {
-                                        var containerName = attributeKey[attrCount]; // Container Name
-                                        var metadataName = metadataKey[metadataCount];
+                function (async_for_loop_callback) {
 
-                                        containerRegistration.ContainerRegistrationExecution(AEName, containerName, metadataName, function (statusCode) {
-                                            if(statusCode == 201)
-                                                callbackForOneM2M(null);
-                                            else
-                                                callbackForOneM2M(statusCode, null);
-                                        });
-                                    },
+                    var contentInstanceName = '', contentInstanceValue = '', subContainerName = '';
+                    var findingLocationType = device[attributeKey[attrCount]].type;
 
-                                    // Creating contentInstance resource for metadata value
-                                    function(callbackForOneM2M) {
-                                        var containerName = attributeKey[attrCount]; // Container Name
-                                        var metadataName = metadataKey[metadataCount];
-                                        var metadataValue = metadataSet[metadataKey[metadataCount]];// contentInstance value
+                    contentInstanceName = attributeKey[attrCount];
+                    console.log("cinName: " + contentInstanceName);
 
-                                        contentInstanceRegistration.contentInstanceRegistrationExecution(AEName, containerName, metadataName, metadataValue, function (statusCode) {
-                                            if(statusCode == 201)
-                                                callbackForOneM2M(null);
-                                            else
-                                                callbackForOneM2M(statusCode, null);
-                                        });
-                                    }
-                                ], function (statusCode, result) {
-                                    if(statusCode) {
-                                        if(statusCode == 409) { // Container Registration Conflict
-                                            metadataCount++; async_for_loop_callback();
-                                        } else {
-                                            async_for_loop_callback(statusCode); // fail
-                                        }
-                                    } else {
-                                        metadataCount++; async_for_loop_callback();
-                                    }
-                                }); // End of async.waterfall
-                            },
-                            function (statusCode, n) {
-                                if(statusCode) {
-                                    callbackForOneM2M(statusCode, null); // fail
-                                } else {
-                                    callbackForOneM2M(null); // success
-                                }
-                            }
-                        ); // End of async.whilist
-                    },
-
-                    // contentInstance Registration
-                    function (callbackForOneM2M) {
-                        // If FIWARE resource has Location Information...
-                        var containerName = attributeKey[attrCount]; // Container Name
-                        var findingLocationType = device[attributeKey[attrCount]].type;
-
-                        var contentInstanceValue = '';
-
+                    if(contentInstanceName == 'dateModified' || contentInstanceName == 'entityName' || contentInstanceName =='entityType') {
+                        attrCount++; async_for_loop_callback();
+                    } else {
                         if(findingLocationType == 'geo:json') {
                             var Location = device[attributeKey[attrCount]].value;
                             var coordinates = Location.coordinates;
@@ -130,37 +85,41 @@ var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControl
                             contentInstanceValue = device[attributeKey[attrCount]].value;// contentInstance value
                         }
 
-                        contentInstanceRegistration.contentInstanceRegistrationExecution(AEName, containerName, null, contentInstanceValue, function (statusCode) {
-                            if(statusCode == 201)
-                                callbackForOneM2M(null);
-                            else
-                                callbackForOneM2M(statusCode, null);
+                        if(contentInstanceName == 'status')
+                            subContainerName = 'status';
+                        else
+                            subContainerName = 'info';
+
+                        console.log(parkingSpotContainerName + ", " + subContainerName + ", "+  contentInstanceName + ", " +  contentInstanceValue);
+
+                        contentInstanceRegistration.contentInstanceRegistrationExecution(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, function (statusCode) {
+                            if (statusCode == 201) {
+                                attrCount++; async_for_loop_callback();
+                            } else
+                                async_for_loop_callback(statusCode, null);
                         });
                     }
-                ], function (statusCode, result) { // response to client such as web or postman
+                },
+                function (statusCode, n) {
                     if(statusCode) {
-                        if(statusCode == 409) { // Container Registration Conflict
-                            attrCount++; async_for_loop_callback();
-                        } else {
-                            async_for_loop_callback(statusCode); // fail
-                        }
+                        CallbackForConCinRegistration(statusCode, null); // fail
                     } else {
-                        attrCount++; async_for_loop_callback();
+                        CallbackForConCinRegistration(null); // success
                     }
-                });
-            } else {
-                attrCount++; async_for_loop_callback();
-            }
-        },
-        function (statusCode, n) {
-            if (statusCode) {
-                oneM2MControllerCallback(false, statusCode);
-            } else {
-                console.log("oneM2M resource registration is finished");
-                oneM2MControllerCallback(true, statusCode);
-            }
+                }
+            ); // End of async.whilist
         }
-    );
+    ], function (statusCode, result) { // response to client such as web or postman
+        if(statusCode) { // AE → Container → contentInstance → Subscription (fail)
+            if(statusCode == 409) { // AE Registration Conflict
+                count++; oneM2MControllerCallback();
+            } else {
+                oneM2MControllerCallback(statusCode); // fail
+            }
+        } else { // AE → Container → contentInstance → Subscription (success)
+            count++; oneM2MControllerCallback();
+        }
+    }); // async.waterfall
 };
 
 var fiwareDeviceUpdateForOneM2M = function(fiwareInformation, oneM2MControllerCallback) {

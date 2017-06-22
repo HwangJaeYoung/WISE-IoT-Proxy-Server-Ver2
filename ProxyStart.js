@@ -138,9 +138,9 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                     CallbackForConCinRegistration(statusCode, null);
                                 }
                             });
-                        },
+                        }
 
-                        // ContextBroker subscription
+                        /*// ContextBroker subscription
                         function(detailFiwareDeviceInfo, CallbackForSubscriptionRegistration) {
                             fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
                                 if(requestResult) { // Subscription Registration success
@@ -157,7 +157,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                     CallbackForSubscriptionRegistration(statusCode, null);
                                 }
                             })
-                        }
+                        } */
                     ], function (statusCode, result) { // response to client such as web or postman
                         if(statusCode) { // AE → Container → contentInstance → Subscription (fail)
                             if(statusCode == 409) { // AE Registration Conflict

@@ -25,11 +25,12 @@ var ContainerBodyGeneration = function (ContainerName) {
     return bodyObject;
 };
 
-var contentInstanceBodyGeneration = function (contentInstanceName) {
+var contentInstanceBodyGeneration = function (contentInstanceName, contentInstanceValue) {
     var bodyObject = new Object();
 
     var rootForAttr = new Object();
-    rootForAttr['con'] = contentInstanceName;
+    rootForAttr['con'] = contentInstanceValue;
+    rootForAttr['rn'] = contentInstanceName;
     bodyObject['m2m:cin'] = rootForAttr;
 
     return bodyObject;
@@ -105,8 +106,8 @@ exports.ContainerBodyGenerator = function(containerName) {
     return ContainerBodyGeneration(containerName);
 };
 
-exports.contentInstanceBodyGenerator = function(contentInstanceValue) {
-    return contentInstanceBodyGeneration(contentInstanceValue);
+exports.contentInstanceBodyGenerator = function(contentInstanceName, contentInstanceValue) {
+    return contentInstanceBodyGeneration(contentInstanceName, contentInstanceValue);
 };
 
 // FIWARE Body Generator

@@ -6,17 +6,14 @@
 var requestToAnotherServer = require('request');
 var bodyGenerator = require('../Domain/BodyGenerator');
 
-var RegistrationExecution = function (AEName, containerName, metadataName, contentInstanceValue, callBackForResponse) {
+var RegistrationExecution = function (parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse) {
 
     var targetURL = '', bodyObject = null;
 
-    if(metadataName) { // Double Container format
-        targetURL = yellowTurtleIP + '/mobius-yt/' + AEName + '/' + containerName + '/' + metadataName;
-        bodyObject = bodyGenerator.contentInstanceBodyGenerator(contentInstanceValue);
-    } else { // General Container format
-        targetURL = yellowTurtleIP + '/mobius-yt/' + AEName + '/' + containerName;
-        bodyObject = bodyGenerator.contentInstanceBodyGenerator(contentInstanceValue);
-    }
+    targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot/' + parkingSpotContainerName + '/' + subContainerName;
+
+    console.log("targetURL:" + targetURL);
+    bodyObject = bodyGenerator.contentInstanceBodyGenerator(contentInstanceName, contentInstanceValue);
 
     requestToAnotherServer({
         url: targetURL,
@@ -34,6 +31,8 @@ var RegistrationExecution = function (AEName, containerName, metadataName, conte
         if(typeof(oneM2MResponse) !== 'undefined') {
             var statusCode = oneM2MResponse.statusCode;
 
+            console.log('Statuscode: ' + statusCode);
+
             if (statusCode == 201) { // resource creation
                 callBackForResponse(statusCode);
             } else if(statusCode == 400) { // bad request
@@ -46,6 +45,6 @@ var RegistrationExecution = function (AEName, containerName, metadataName, conte
     });
 };
 
-exports.contentInstanceRegistrationExecution = function(AEName, containerName, metadataName, contentInstanceValue, callBackForResponse) {
-    RegistrationExecution(AEName, containerName, metadataName, contentInstanceValue, callBackForResponse);
+exports.contentInstanceRegistrationExecution = function(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse) {
+    RegistrationExecution(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse);
 };
