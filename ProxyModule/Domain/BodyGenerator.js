@@ -27,8 +27,21 @@ var ContainerBodyGeneration = function (ContainerName) {
 
 var contentInstanceBodyGeneration = function (contentInstanceName, contentInstanceValue) {
     var bodyObject = new Object();
-
     var rootForAttr = new Object();
+
+    var cur_d = new Date();
+    var msec = '';
+
+    if((parseInt(cur_d.getMilliseconds(), 10) < 10)) {
+        msec = ('00' + cur_d.getMilliseconds());
+    } else if((parseInt(cur_d.getMilliseconds(), 10) < 100)) {
+        msec = ('0' + cur_d.getMilliseconds());
+    } else {
+        msec = cur_d.getMilliseconds();
+    }
+
+    contentInstanceName =  contentInstanceName + cur_d.toISOString().replace(/-/, '').replace(/-/, '').replace(/T/, '').replace(/:/, '').replace(/:/, '').replace(/\..+/, '') + msec + randomValueBase64(4);
+
     rootForAttr['con'] = contentInstanceValue;
     rootForAttr['rn'] = contentInstanceName;
     bodyObject['m2m:cin'] = rootForAttr;

@@ -11,6 +11,7 @@ var bodyParser = require('body-parser');
 var fiwareController = require('./ProxyModule/FiwareController');
 var oneM2MController = require('./ProxyModule/oneM2MController');
 var statusCodeMessage = require('./ETC/StatusCode');
+const crypto = require('crypto');
 var app = express();
 
 app.use(bodyParser.json());
@@ -19,6 +20,13 @@ app.use(bodyParser.urlencoded({extended:false}));
 global.fiwareIP = '';
 global.yellowTurtleIP = '';
 global.notificationURL = '';
+global.randomValueBase64 = function(len) {
+    return crypto.randomBytes(Math.ceil(len * 3 / 4))
+        .toString('base64')   // convert to base64 format
+        .slice(0, len)        // return required number of characters
+        .replace(/\+/g, '0')  // replace '+' with '0'
+        .replace(/\//g, '0'); // replace '/' with '0'
+};
 
 fs.readFile('conf.json', 'utf-8', function (err, data) {
     if (err) {
@@ -183,6 +191,29 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
         console.log(statusCodeMessage.statusCodeGenerator((statusCode)));
         response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
     });
+});
+
+// Getting FIWARE device list
+app.get('/getFiwareDeviceList', function (request, response) {
+
+    var fiwareIPAddr = "http://192.168.0.125:1026";
+    var queryTypeofFIWARE = "ParkingSpot";
+
+    fiwareController.executeQueryEntitySimple(fiwareIPAddr, queryTypeofFIWARE, function (requestResult, statusCode, responseObject) {
+        if (requestResult) { // success (true)
+            response.status(statusCode).send(responseObject);
+        } else { // fail (false)
+            response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
+        }
+    });
+});
+
+// FIWARE device manage list
+app.post('/getConnectedDeviceList', function (request, response) {
+
+
+
+
 });
 
 // Fiware Subscription endpoint

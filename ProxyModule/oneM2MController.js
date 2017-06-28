@@ -74,7 +74,7 @@ var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControl
                     contentInstanceName = attributeKey[attrCount];
                     console.log("cinName: " + contentInstanceName);
 
-                    if(contentInstanceName == 'dateModified' || contentInstanceName == 'entityName' || contentInstanceName =='entityType') {
+                    if(contentInstanceName == 'entityName' || contentInstanceName =='entityType') {
                         attrCount++; async_for_loop_callback();
                     } else {
                         if(findingLocationType == 'geo:json') {

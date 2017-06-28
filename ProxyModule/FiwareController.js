@@ -5,9 +5,10 @@
 
 // extract the modules
 var async = require('async');
-var getFiwareDeviceController = require('./FIWARE/FiwareQueryEntity');
-var subFiwareDeviceController = require('./FIWARE/FiwareSubscription');
-var unsubFiwareDeviceController = require('./FIWARE/FiwareUnsubscription');
+var getFiwareDeviceFunction = require('./FIWARE/FiwareQueryEntity');
+var getFiwareDeviceSimpleFunction = require('./FIWARE/FiwareQueryEntitySimple');
+var subFiwareDeviceFunction = require('./FIWARE/FiwareSubscription');
+var unsubFiwareDeviceFunction = require('./FIWARE/FiwareUnsubscription');
 
 var iterationEntityQuery = function(fiwareDeviceInfo, fiwareControllerCallback) {
     var count = 0;
@@ -22,7 +23,7 @@ var iterationEntityQuery = function(fiwareDeviceInfo, fiwareControllerCallback) 
         function () { return count < deviceLists; },
 
         function (async_for_loop_callback) {
-            getFiwareDeviceController.getFiwareDevice(fiwareDeviceInfo.entityName[count], fiwareDeviceInfo.entityType[count], function(statusCode, responseObject) {
+            getFiwareDeviceFunction.getFiwareDevice(fiwareDeviceInfo.entityName[count], fiwareDeviceInfo.entityType[count], function(statusCode, responseObject) {
 
                 if(statusCode == 200) { // request success
                     // Defining FIWARE Device
@@ -49,6 +50,16 @@ var iterationEntityQuery = function(fiwareDeviceInfo, fiwareControllerCallback) 
     );
 };
 
+var iterationEntityQuerySimple = function(fiwareIPAddr, fiwareEntityType, fiwareControllerCallback) {
+    getFiwareDeviceSimpleFunction.getFiwareDevice(fiwareIPAddr, fiwareEntityType, function(statusCode, responseObject) {
+        if(statusCode == 200) { // request success
+            fiwareControllerCallback(true, statusCode, responseObject);
+        } else { // request fail
+            fiwareControllerCallback(false, statusCode, null);
+        }
+    });
+};
+
 var iterationEntitySubscription = function(count, fiwareDeviceInfo, fiwareControllerCallback) {
 
     var selectedDevices = fiwareDeviceInfo['FiwareDevices']; // Root
@@ -56,7 +67,7 @@ var iterationEntitySubscription = function(count, fiwareDeviceInfo, fiwareContro
     var deviceKey = [Object.keys(deviceInfo)[count]]; // device1, device2, ... , deviceN
     var device = deviceInfo[deviceKey];
 
-    subFiwareDeviceController.subFiwareDevice(device, function(statusCode, subscriptionID) {
+    subFiwareDeviceFunction.subFiwareDevice(device, function(statusCode, subscriptionID) {
         // Checking for iteration
         if(statusCode == 201) { // request success
             fiwareControllerCallback(true, statusCode, subscriptionID + '\n');
@@ -75,7 +86,7 @@ var iterationEntityUnsubscription = function(subscriptionIDArray, fiwareControll
 
         function (async_for_loop_callback) {
             // Checking for iteration
-            unsubFiwareDeviceController.unsubFiwareDevice(subscriptionIDArray[count], function(statusCode) {
+            unsubFiwareDeviceFunction.unsubFiwareDevice(subscriptionIDArray[count], function(statusCode) {
                 // Unsubscribing operation success
                 if(statusCode == 204) {
                     count++; async_for_loop_callback(null, count);
@@ -97,6 +108,10 @@ var iterationEntityUnsubscription = function(subscriptionIDArray, fiwareControll
 
 exports.executeQueryEntity = function(fiwareDeviceInfo, fiwareControllerCallback) {
     iterationEntityQuery(fiwareDeviceInfo, fiwareControllerCallback);
+};
+
+exports.executeQueryEntitySimple = function(fiwareIPAddr, fiwareEntityType, fiwareControllerCallback) {
+    iterationEntityQuerySimple(fiwareIPAddr, fiwareEntityType, fiwareControllerCallback);
 };
 
 exports.executeSubscriptionEntity = function (count, fiwareDeviceInfo, fiwareControllerCallback) {
