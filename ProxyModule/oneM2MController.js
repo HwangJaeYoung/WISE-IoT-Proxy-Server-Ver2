@@ -123,89 +123,47 @@ var fiwareDeviceUpdateForOneM2M = function(fiwareInformation, oneM2MControllerCa
 
     var attrCount = 0; // Initialization for counting
 
+
+
     var attributeOrigin = fiwareInformation['data'][0]; // Root
     var attributeKeys = Object.keys(attributeOrigin);
     var attributeNumber = attributeKeys.length;
-
-    console.log("value attr count : " + attributeNumber);
 
     async.whilst(
         function () { return attrCount < attributeNumber; },
 
         function (async_for_loop_callback) {
+            console.log("arrtCount : " + attrCount);
             // Getting the spot container name.
             var spotContainerName = attributeOrigin.id;
 
             if ((attributeKeys[attrCount] == 'id' || attributeKeys[attrCount] == 'type') == false) {
-                async.waterfall([
-                    function(CallbackForNotification){
-                        var metadataCount = 0;
-                        var metadataSet = attributeOrigin[attributeKeys[attrCount]].metadata;
-                        var metadataKey = Object.keys(metadataSet);
-                        var findingLocationType = '';
+                var contentInstanceName = attributeKeys[attrCount];
+                var contentInstanceValue = '', subContainerName = '';
 
-                        if(metadataKey.length)
-                            findingLocationType = attributeOrigin[attributeKeys[attrCount]].type;
+                var findingLocationType = attributeOrigin[attributeKeys[attrCount]].type;
 
-                        if(metadataKey.length && findingLocationType != 'geo:json') { // if metadata exist...
-                            async.whilst(
-                                function () { return metadataCount < metadataKey.length; },
+                if(findingLocationType == 'geo:json') {
+                    var Location = attributeOrigin[attributeKeys[attrCount]].value;
+                    var coordinates = Location.coordinates;
+                    contentInstanceValue = coordinates[0] + ":" + coordinates[1];
+                } else {
+                    contentInstanceValue = attributeOrigin[attributeKeys[attrCount]].value; // contentInstance value
+                }
 
-                                function (async_for_loop_callback) {
-                                    var containerName = attributeKeys[attrCount]; // Container Name
-                                    var metadataName = metadataKey[metadataCount]; // 2nd Container Name
-                                    var metadataValue = metadataSet[metadataKey[metadataCount]].value; // contentInstance value
+                if(contentInstanceName == 'status')
+                    subContainerName = 'status';
+                else
+                    subContainerName = 'info';
 
-                                    contentInstanceRegistration.contentInstanceRegistrationExecution(AEName, containerName, metadataName, metadataValue, function (statusCode) {
-                                        if (statusCode == 201) {
-                                            metadataCount++; async_for_loop_callback();
-                                        } else
-                                            async_for_loop_callback(statusCode, null);
-                                    });
-                                },
-                                function (statusCode, n) {
-                                    if(statusCode) {
-                                        CallbackForNotification(statusCode, null); // fail
-                                    } else {
-                                        CallbackForNotification(null); // success
-                                    }
-                                }
-                            ); // End of async.whilist
-                        } else { // if not...
-                            CallbackForNotification(null);
-                        }
-                    },
-
-                    // Container, contentInstance registration
-                    function(CallbackForNotification) {
-                        var containerName = attributeKeys[attrCount];
-                        var contentInstanceValue = '';
-
-                        var findingLocationType = attributeOrigin[attributeKeys[attrCount]].type;
-
-                        if(findingLocationType == 'geo:json') {
-                            var Location = attributeOrigin[attributeKeys[attrCount]].value;
-                            var coordinates = Location.coordinates;
-                            contentInstanceValue = coordinates[0] + ":" + coordinates[1];
-                        } else {
-                            contentInstanceValue = attributeOrigin[attributeKeys[attrCount]].value; // contentInstance value
-                        }
-
-                        contentInstanceRegistration.contentInstanceRegistrationExecution(AEName, containerName, null, contentInstanceValue, function (statusCode) {
-                            if(statusCode == 201) {
-                                CallbackForNotification(null);
-                            } else {
-                                CallbackForNotification(statusCode);
-                            }
-                        });
-                    }
-                ], function (statusCode, result) { // response to client such as web or postman
-                    if(statusCode) {
-                        async_for_loop_callback(statusCode); // fail
-                    } else {
+                // RegistrationExecution(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse);
+                contentInstanceRegistration.contentInstanceRegistrationExecution(spotContainerName, subContainerName, contentInstanceName, contentInstanceValue, function (statusCode) {
+                    if(statusCode == 201) {
                         attrCount++; async_for_loop_callback();
+                    } else {
+                        async_for_loop_callback(statusCode, null);
                     }
-                }); // End of async.waterfall
+                })
             } else {
                 attrCount++; async_for_loop_callback();
             }

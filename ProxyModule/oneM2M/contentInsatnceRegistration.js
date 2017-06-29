@@ -15,8 +15,6 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
     console.log("targetURL:" + targetURL);
     bodyObject = bodyGenerator.contentInstanceBodyGenerator(contentInstanceName, contentInstanceValue);
 
-    console.log(JSON.stringify(bodyObject));
-
     requestToAnotherServer({
         url: targetURL,
         method: 'POST',
@@ -32,8 +30,6 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
 
         if(typeof(oneM2MResponse) !== 'undefined') {
             var statusCode = oneM2MResponse.statusCode;
-
-            console.log('Statuscode: ' + statusCode);
 
             if (statusCode == 201) { // resource creation
                 callBackForResponse(statusCode);
