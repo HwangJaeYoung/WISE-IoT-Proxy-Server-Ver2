@@ -146,10 +146,13 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                     CallbackForConCinRegistration(statusCode, null);
                                 }
                             });
-                        }
+                        },
 
-                        /*// ContextBroker subscription
+                        // ContextBroker subscription
                         function(detailFiwareDeviceInfo, CallbackForSubscriptionRegistration) {
+
+                            console.log(JSON.stringify(detailFiwareDeviceInfo));
+
                             fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
                                 if(requestResult) { // Subscription Registration success
 
@@ -159,13 +162,12 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                         else
                                             console.log('SubscriptionID is stored in subscriptionList.txt');
                                     });
-
                                     CallbackForSubscriptionRegistration(null);
                                 } else { // Subscription Registration fail
                                     CallbackForSubscriptionRegistration(statusCode, null);
                                 }
                             })
-                        } */
+                        }
                     ], function (statusCode, result) { // response to client such as web or postman
                         if(statusCode) { // AE → Container → contentInstance → Subscription (fail)
                             if(statusCode == 409) { // AE Registration Conflict
@@ -194,10 +196,11 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
 });
 
 // Getting FIWARE device list
-app.get('/getFiwareDeviceList', function (request, response) {
+app.post('/getFiwareDeviceList', function (request, response) {
 
-    var fiwareIPAddr = "http://192.168.0.125:1026";
-    var queryTypeofFIWARE = "ParkingSpot";
+    var fiwareQueryInfo = request.body['FiwareQueryInfo']; // Root
+    var fiwareIPAddr = fiwareQueryInfo.fiwareIPAddr;
+    var queryTypeofFIWARE = fiwareQueryInfo.selectedEntityType;
 
     fiwareController.executeQueryEntitySimple(fiwareIPAddr, queryTypeofFIWARE, function (requestResult, statusCode, responseObject) {
         if (requestResult) { // success (true)
@@ -206,14 +209,6 @@ app.get('/getFiwareDeviceList', function (request, response) {
             response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
         }
     });
-});
-
-// FIWARE device manage list
-app.post('/getConnectedDeviceList', function (request, response) {
-
-
-
-
 });
 
 // Fiware Subscription endpoint

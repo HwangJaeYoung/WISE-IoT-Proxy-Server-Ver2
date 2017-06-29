@@ -42,6 +42,7 @@ var contentInstanceBodyGeneration = function (contentInstanceName, contentInstan
 
     contentInstanceName =  contentInstanceName + cur_d.toISOString().replace(/-/, '').replace(/-/, '').replace(/T/, '').replace(/:/, '').replace(/:/, '').replace(/\..+/, '') + msec + randomValueBase64(4);
 
+    console.log('Value : ' + contentInstanceValue);
     rootForAttr['con'] = contentInstanceValue;
     rootForAttr['rn'] = contentInstanceName;
     bodyObject['m2m:cin'] = rootForAttr;

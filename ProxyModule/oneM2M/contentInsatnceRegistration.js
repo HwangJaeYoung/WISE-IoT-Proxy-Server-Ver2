@@ -15,6 +15,8 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
     console.log("targetURL:" + targetURL);
     bodyObject = bodyGenerator.contentInstanceBodyGenerator(contentInstanceName, contentInstanceValue);
 
+    console.log(JSON.stringify(bodyObject));
+
     requestToAnotherServer({
         url: targetURL,
         method: 'POST',

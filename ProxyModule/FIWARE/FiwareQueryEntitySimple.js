@@ -6,7 +6,7 @@ var requestToAnotherServer = require('request');
 
 var gettingDeviceInfo = function (fiwareIPAddr, fiwareEntityType, fiwareCallback) {
 
-    var targetURL = fiwareIPAddr + '/v2/entities' + '?' + 'type=' + fiwareEntityType;
+    var targetURL = fiwareIPAddr + '/v2/entities' + '?' + 'type=' + fiwareEntityType + '&limit=2';
 
     console.log(targetURL);
 

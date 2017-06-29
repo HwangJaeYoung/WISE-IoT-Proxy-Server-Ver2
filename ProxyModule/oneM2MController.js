@@ -110,14 +110,11 @@ var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControl
             ); // End of async.whilist
         }
     ], function (statusCode, result) { // response to client such as web or postman
-        if(statusCode) { // AE → Container → contentInstance → Subscription (fail)
-            if(statusCode == 409) { // AE Registration Conflict
-                count++; oneM2MControllerCallback();
-            } else {
-                oneM2MControllerCallback(statusCode); // fail
-            }
-        } else { // AE → Container → contentInstance → Subscription (success)
-            count++; oneM2MControllerCallback();
+        if (statusCode) {
+            oneM2MControllerCallback(false, statusCode);
+        } else {
+            console.log("oneM2M resource registration is finished");
+            oneM2MControllerCallback(true, statusCode);
         }
     }); // async.waterfall
 };
