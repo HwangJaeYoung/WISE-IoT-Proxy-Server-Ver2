@@ -127,12 +127,14 @@ var fiwareDeviceUpdateForOneM2M = function(fiwareInformation, oneM2MControllerCa
     var attributeKeys = Object.keys(attributeOrigin);
     var attributeNumber = attributeKeys.length;
 
+    console.log("value attr count : " + attributeNumber);
+
     async.whilst(
         function () { return attrCount < attributeNumber; },
 
         function (async_for_loop_callback) {
-            // Creating AE name using Entity Name and Entity Type.
-            var AEName = attributeOrigin.id + ":" + attributeOrigin.type;
+            // Getting the spot container name.
+            var spotContainerName = attributeOrigin.id;
 
             if ((attributeKeys[attrCount] == 'id' || attributeKeys[attrCount] == 'type') == false) {
                 async.waterfall([

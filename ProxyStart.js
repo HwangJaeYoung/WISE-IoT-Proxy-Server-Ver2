@@ -213,6 +213,14 @@ app.post('/getFiwareDeviceList', function (request, response) {
 
 // Fiware Subscription endpoint
 app.post('/FiwareNotificationEndpoint', function(request, response) {
+
+    console.log(JSON.stringify(request.body));
+
+    var dataset = request.body;
+    var subID = dataset.subscriptionId;
+
+    console.log(subID);
+
     oneM2MController.updateFiwareToOneM2M(request.body, function (requestResult, statusCode) {
         // In this function we don't use requestResult
         console.log(statusCodeMessage.statusCodeGenerator(statusCode));
