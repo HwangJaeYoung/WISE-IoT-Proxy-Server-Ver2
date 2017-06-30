@@ -10,6 +10,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var fiwareController = require('./ProxyModule/FiwareController');
 var oneM2MController = require('./ProxyModule/oneM2MController');
+var sendingNodeCount = require('./ProxyModule/MMG/PostConnectedDevice');
 var statusCodeMessage = require('./ETC/StatusCode');
 const crypto = require('crypto');
 var app = express();
@@ -20,6 +21,7 @@ app.use(bodyParser.urlencoded({extended:false}));
 global.fiwareIP = '';
 global.yellowTurtleIP = '';
 global.notificationURL = '';
+global.MMGURL = '';
 global.randomValueBase64 = function(len) {
     return crypto.randomBytes(Math.ceil(len * 3 / 4))
         .toString('base64')   // convert to base64 format
@@ -27,6 +29,7 @@ global.randomValueBase64 = function(len) {
         .replace(/\+/g, '0')  // replace '+' with '0'
         .replace(/\//g, '0'); // replace '/' with '0'
 };
+global.connectedDeviceList = 0;
 
 fs.readFile('conf.json', 'utf-8', function (err, data) {
     if (err) {
@@ -38,6 +41,7 @@ fs.readFile('conf.json', 'utf-8', function (err, data) {
         fiwareIP = conf['fiwareIP'];
         yellowTurtleIP = conf['yellowTurtleIP'];
         notificationURL = conf['notificationURL'];
+        MMGURL = conf['MMGURL'];
 
         serverStartFunction();
 
@@ -156,6 +160,10 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                             fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
                                 if(requestResult) { // Subscription Registration success
 
+                                    connectedDeviceList++;
+
+                                    console.log(connectedDeviceList);
+
                                     fs.appendFile('subscriptionList.txt', subscriptionID, function (err) {
                                         if (err)
                                             console.log('FATAL An error occurred trying to write in the file: ' + err);
@@ -191,6 +199,12 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
         } // oneM2M Registration function
     ], function (statusCode, result) { // response to client such as web or postman
         console.log(statusCodeMessage.statusCodeGenerator((statusCode)));
+
+        if(statusCode == 201) {
+            sendingNodeCount.FIWARENodeCountExecution(connectedDeviceList, function (statusCode) {
+                response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
+            });
+        }
         response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
     });
 });
@@ -221,6 +235,11 @@ app.post('/FiwareNotificationEndpoint', function(request, response) {
 
 // Server testing code
 app.get('/', function (request, response) {
+
+    var obj = bodyGenerator.nodeCountBodyGenerator(62590);
+
+    console.log(JSON.stringify(obj));
+
     response.send('<h1>'+ 'WISE-IoT' + '</h1>');
 });
 

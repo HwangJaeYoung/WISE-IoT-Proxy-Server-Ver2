@@ -111,6 +111,16 @@ var subscriptionBodyGenerator = function (device) {
     return bodyObject;
 };
 
+var generatingNodeCountBody = function (nodeCount) {
+    var bodyObject = new Object();
+
+    var nodeCountObject = new Object();
+    nodeCountObject['managedFiwareDevices'] = nodeCount;
+    bodyObject['FiwareManagedInfo'] = nodeCountObject;
+
+    return bodyObject;
+};
+
 // oneM2M Body Generator
 exports.AEBodyGenerator = function(AEName) {
     return AEBodyGeneration(AEName);
@@ -127,4 +137,9 @@ exports.contentInstanceBodyGenerator = function(contentInstanceName, contentInst
 // FIWARE Body Generator
 exports.fiwareSubscriptionBodyGenerator = function (device) {
     return subscriptionBodyGenerator(device);
+};
+
+// Node count Generator
+exports.nodeCountBodyGenerator = function (nodeCount) {
+    return generatingNodeCountBody(nodeCount);
 };
