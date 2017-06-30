@@ -155,14 +155,10 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                         // ContextBroker subscription
                         function(detailFiwareDeviceInfo, CallbackForSubscriptionRegistration) {
 
-                            console.log(JSON.stringify(detailFiwareDeviceInfo));
-
                             fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
                                 if(requestResult) { // Subscription Registration success
 
                                     connectedDeviceList++;
-
-                                    console.log(connectedDeviceList);
 
                                     fs.appendFile('subscriptionList.txt', subscriptionID, function (err) {
                                         if (err)
