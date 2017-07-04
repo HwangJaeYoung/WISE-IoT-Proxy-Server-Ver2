@@ -43,37 +43,46 @@ fs.readFile('conf.json', 'utf-8', function (err, data) {
         notificationURL = conf['notificationURL'];
         MMGURL = conf['MMGURL'];
 
-        serverStartFunction();
-
-        /*fs.readFile('subscriptionList.txt', 'utf-8', function (err, data) {
+        fs.readFile('nodeCount.json', 'utf-8', function (err, data) {
             if (err) {
                 console.log("FATAL An error occurred trying to read in the file: " + err);
+                console.log("error : set to default for configuration");
             } else {
-                var subIdArray = data.split("\n");
+                var counting = JSON.parse(data)['proxy:nodeCount'];
+                connectedDeviceList = counting['count'];
+                serverStartFunction();
 
-                if(subIdArray.length > 0 && subIdArray[0] != '') {
-                    console.log('Subscription Delete start....');
+                /*fs.readFile('subscriptionList.txt', 'utf-8', function (err, data) {
+                 if (err) {
+                 console.log("FATAL An error occurred trying to read in the file: " + err);
+                 } else {
+                 var subIdArray = data.split("\n");
 
-                    fiwareController.executeUnsubscriptionEntity(subIdArray, function (requestResult, statusCode) {
+                 if(subIdArray.length > 0 && subIdArray[0] != '') {
+                 console.log('Subscription Delete start....');
 
-                        if(requestResult) { // success (true)
-                            fs.writeFile('subscriptionList.txt', '', function (err) {
-                                if (err)
-                                    console.log('FATAL An error occurred trying to write in the file: ' + err);
-                                else {
-                                    serverStartFunction();
-                                }
-                            });
-                        } else { // fail (false)
-                            console.log(statusCodeMessage.statusCodeGenerator(statusCode) + '\n');
-                            console.log('Please restart server...');
-                        }
-                    });
-                } else {
-                    serverStartFunction();
-                }
+                 fiwareController.executeUnsubscriptionEntity(subIdArray, function (requestResult, statusCode) {
+
+                 if(requestResult) { // success (true)
+                 fs.writeFile('subscriptionList.txt', '', function (err) {
+                 if (err)
+                 console.log('FATAL An error occurred trying to write in the file: ' + err);
+                 else {
+                 serverStartFunction();
+                 }
+                 });
+                 } else { // fail (false)
+                 console.log(statusCodeMessage.statusCodeGenerator(statusCode) + '\n');
+                 console.log('Please restart server...');
+                 }
+                 });
+                 } else {
+                 serverStartFunction();
+                 }
+                 }
+                 });*/
             }
-        });*/
+        });
     }
 });
 
@@ -160,6 +169,18 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
 
                                     connectedDeviceList++;
 
+                                    var rootObject = new Object();
+                                    var countObject = new Object();
+                                    countObject["count"] = connectedDeviceList;
+                                    rootObject['proxy:nodeCount'] = countObject;
+
+                                    fs.writeFile('nodeCount.json', JSON.stringify(rootObject), function (err) {
+                                        if (err)
+                                            console.log('FATAL An error occurred trying to write in the file: ' + err);
+                                        else
+                                            console.log('SubscriptionID is stored in subscriptionList.txt');
+                                    });
+
                                     fs.appendFile('subscriptionList.txt', subscriptionID, function (err) {
                                         if (err)
                                             console.log('FATAL An error occurred trying to write in the file: ' + err);
@@ -223,6 +244,9 @@ app.post('/getFiwareDeviceList', function (request, response) {
 
 // Fiware Subscription endpoint
 app.post('/FiwareNotificationEndpoint', function(request, response) {
+
+    console.log("Receiving notification messages from FIWARE");
+
     oneM2MController.updateFiwareToOneM2M(request.body, function (requestResult, statusCode) {
         // In this function we don't use requestResult
         console.log(statusCodeMessage.statusCodeGenerator(statusCode));

@@ -16,7 +16,9 @@ var executeRegistrationContainer = function(count, fiwareInformation, oneM2MCont
     // Creating AE name using Entity Name and Entity Type.
     var parkingSpotContainerName = deviceInfo[Object.keys(deviceInfo)[count]].entityName;
 
-    containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, null, function (statusCode) {
+    var parkingSpotContainerName = parkingSpotContainerName.replace(/:/g, ".");
+
+   containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, null, function (statusCode) {
         if(statusCode == 201)
             oneM2MControllerCallback(true, statusCode);
         else
@@ -32,6 +34,8 @@ var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControl
     var device = deviceInfo[deviceKey];
 
     var parkingSpotContainerName = deviceInfo[Object.keys(deviceInfo)[count]].entityName;
+
+    parkingSpotContainerName = parkingSpotContainerName.replace(/:/g, ".");
 
     async.waterfall([
         // status container registration
@@ -122,9 +126,6 @@ var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControl
 var fiwareDeviceUpdateForOneM2M = function(fiwareInformation, oneM2MControllerCallback) {
 
     var attrCount = 0; // Initialization for counting
-
-
-
     var attributeOrigin = fiwareInformation['data'][0]; // Root
     var attributeKeys = Object.keys(attributeOrigin);
     var attributeNumber = attributeKeys.length;
@@ -136,6 +137,8 @@ var fiwareDeviceUpdateForOneM2M = function(fiwareInformation, oneM2MControllerCa
             console.log("arrtCount : " + attrCount);
             // Getting the spot container name.
             var spotContainerName = attributeOrigin.id;
+
+            spotContainerName = spotContainerName.replace(/:/g, ".");
 
             if ((attributeKeys[attrCount] == 'id' || attributeKeys[attrCount] == 'type') == false) {
                 var contentInstanceName = attributeKeys[attrCount];

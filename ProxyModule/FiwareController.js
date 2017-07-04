@@ -61,7 +61,7 @@ var iterationEntityQuerySimple = function(fiwareIPAddr, fiwareEntityType, fiware
 };
 
 var iterationEntitySubscription = function(count, fiwareDeviceInfo, fiwareControllerCallback) {
-    
+
     var selectedDevices = fiwareDeviceInfo['FiwareDevices']; // Root
     var deviceInfo = selectedDevices.deviceInfo;
     var deviceKey = [Object.keys(deviceInfo)[count]]; // device1, device2, ... , deviceN
