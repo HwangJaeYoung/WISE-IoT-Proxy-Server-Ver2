@@ -178,7 +178,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                         if (err)
                                             console.log('FATAL An error occurred trying to write in the file: ' + err);
                                         else
-                                            console.log('SubscriptionID is stored in subscriptionList.txt');
+                                            console.log('nodeCount is stored in nodeCount.json');
                                     });
 
                                     fs.appendFile('subscriptionList.txt', subscriptionID, function (err) {
@@ -195,7 +195,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                         }
                     ], function (statusCode, result) { // response to client such as web or postman
                         if(statusCode) { // AE → Container → contentInstance → Subscription (fail)
-                            if(statusCode == 409) { // AE Registration Conflict
+                            if(statusCode == 409) { // Container Registration Conflict
                                 count++; async_for_loop_callback();
                             } else {
                                 async_for_loop_callback(statusCode); // fail
@@ -255,12 +255,7 @@ app.post('/FiwareNotificationEndpoint', function(request, response) {
 
 // Server testing code
 app.get('/', function (request, response) {
-
-    var obj = bodyGenerator.nodeCountBodyGenerator(62590);
-
-    console.log(JSON.stringify(obj));
-
-    response.send('<h1>'+ 'WISE-IoT' + '</h1>');
+    response.send('<h1>'+ connectedDeviceList + '</h1>');
 });
 
 var serverStartFunction = function( ) {
