@@ -217,11 +217,11 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
     ], function (statusCode, result) { // response to client such as web or postman
         console.log(statusCodeMessage.statusCodeGenerator((statusCode)));
 
-        if(statusCode == 201) {
+        /*if(statusCode == 201) {
             sendingNodeCount.FIWARENodeCountExecution(connectedDeviceList, function (statusCode) {
                 response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
             });
-        }
+        }*/
         response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
     });
 });

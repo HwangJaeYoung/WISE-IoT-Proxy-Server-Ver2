@@ -8,8 +8,12 @@ var bodyGenerator = require('../Domain/BodyGenerator');
 
 var subscriptionFiwareDevice = function (device, fiwareCallback) {
 
+    console.log("ADSfadsf");
+
     var targetURL = fiwareIP + '/v2/subscriptions';
     var bodyObject = bodyGenerator.fiwareSubscriptionBodyGenerator(device);
+
+    console.log(bodyObject);
 
     // Request for subscribing fiware device information from ContextBroker (Subscription Entity)
     requestToAnotherServer( { url : targetURL,

@@ -115,6 +115,7 @@ exports.executeQueryEntitySimple = function(fiwareIPAddr, fiwareEntityType, fiwa
 };
 
 exports.executeSubscriptionEntity = function (count, fiwareDeviceInfo, fiwareControllerCallback) {
+    console.log("ADSfadsf1");
     iterationEntitySubscription(count, fiwareDeviceInfo, fiwareControllerCallback);
 };
 
