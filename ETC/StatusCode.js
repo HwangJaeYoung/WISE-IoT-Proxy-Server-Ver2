@@ -3,6 +3,9 @@
  * forest62590@gmail.com
  */
 
+// We can enhance these status code by adding error messages from server.
+// For example, var getStatusCodeMessage = function (statusCode, errorMessages) { ... }
+
 var getStatusCodeMessage = function(statusCode) {
     if(statusCode == 200) {
         return "Resource retrieving success";

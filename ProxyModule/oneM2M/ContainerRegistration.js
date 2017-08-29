@@ -18,6 +18,8 @@ var RegistrationExecution = function (containerName, subContainerName, callBackF
         bodyObject = bodyGenerator.ContainerBodyGenerator(containerName);
     }
 
+    console.log("Target URL :" + targetURL);
+
     requestToAnotherServer({
         url: targetURL,
         method: 'POST',
@@ -26,7 +28,7 @@ var RegistrationExecution = function (containerName, subContainerName, callBackF
             'Accept': 'application/json',
             'X-M2M-RI': '12345',
             'X-M2M-Origin': 'Origin',
-            'Content-Type': 'application/vnd.onem2m-res+json; ty=3'
+            'Content-Type': 'application/json;ty=3'
         },
         body: bodyObject
     }, function (error, oneM2MResponse, body) {
@@ -34,8 +36,8 @@ var RegistrationExecution = function (containerName, subContainerName, callBackF
 
             var statusCode = oneM2MResponse.statusCode;
 
-            if (statusCode == 201) { // resource creation
-                callBackForResponse(statusCode); // Callback method for sending QueryEntity result to FiwareController
+            if (statusCode == 201) { // resource creation success
+                callBackForResponse(statusCode);
             } else if(statusCode == 400) { // bad request
                 callBackForResponse(statusCode);
             } else if (statusCode == 409) { // resource conflict error

@@ -3,6 +3,7 @@
  * forest62590@gmail.com
  */
 
+// This code is not used currently. But all header information will be made by this function later.
 var AEHeaderGeneration = function (AEName) {
     var headerObject = new Object();
 

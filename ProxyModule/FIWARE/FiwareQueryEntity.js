@@ -9,8 +9,7 @@ var gettingDeviceInfo = function (EntityName, EntityType, fiwareCallback) {
 
     var targetURL = fiwareIP + '/v2/entities/' + EntityName + '/' + 'attrs' + '?' + 'type=' + EntityType;
 
-
-    console.log(targetURL);
+    console.log("Target URL :" + targetURL);
 
     // Request for getting fiware device information from ContextBroker (Query Entity)
     requestToAnotherServer( { url : targetURL,

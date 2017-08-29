@@ -38,6 +38,7 @@ fs.readFile('conf.json', 'utf-8', function (err, data) {
     } else {
         var conf = JSON.parse(data)['proxy:conf'];
 
+        // This url information will be changed by MMG manager input. if not CAG will use these url.
         fiwareIP = conf['fiwareIP'];
         yellowTurtleIP = conf['yellowTurtleIP'];
         notificationURL = conf['notificationURL'];
@@ -46,41 +47,43 @@ fs.readFile('conf.json', 'utf-8', function (err, data) {
         fs.readFile('nodeCount.json', 'utf-8', function (err, data) {
             if (err) {
                 console.log("FATAL An error occurred trying to read in the file: " + err);
-                console.log("error : set to default for configuration");
             } else {
                 var counting = JSON.parse(data)['proxy:nodeCount'];
                 connectedDeviceList = counting['count'];
                 serverStartFunction();
 
-                /*fs.readFile('subscriptionList.txt', 'utf-8', function (err, data) {
-                 if (err) {
-                 console.log("FATAL An error occurred trying to read in the file: " + err);
-                 } else {
-                 var subIdArray = data.split("\n");
+                // Optional Function (Automatically, Manually)
+                // When CAG starts, It deletes all subscriptions based on subscriptionList.txt file.
+                // If user don't use this function, user can delete subscription if they are available.
+                /* fs.readFile('subscriptionList.txt', 'utf-8', function (err, data) {
+                    if (err) {
+                        console.log("FATAL An error occurred trying to read in the file: " + err);
+                    } else {
+                        var subIdArray = data.split("\n");
 
-                 if(subIdArray.length > 0 && subIdArray[0] != '') {
-                 console.log('Subscription Delete start....');
+                        if(subIdArray.length > 0 && subIdArray[0] != '') {
+                            console.log('Subscription Delete start....');
 
-                 fiwareController.executeUnsubscriptionEntity(subIdArray, function (requestResult, statusCode) {
+                            fiwareController.executeUnsubscriptionEntity(subIdArray, function (requestResult, statusCode) {
 
-                 if(requestResult) { // success (true)
-                 fs.writeFile('subscriptionList.txt', '', function (err) {
-                 if (err)
-                 console.log('FATAL An error occurred trying to write in the file: ' + err);
-                 else {
-                 serverStartFunction();
-                 }
-                 });
-                 } else { // fail (false)
-                 console.log(statusCodeMessage.statusCodeGenerator(statusCode) + '\n');
-                 console.log('Please restart server...');
-                 }
-                 });
-                 } else {
-                 serverStartFunction();
-                 }
-                 }
-                 });*/
+                                if(requestResult) { // success (true)
+                                    fs.writeFile('subscriptionList.txt', '', function (err) {
+                                        if (err)
+                                            console.log('FATAL An error occurred trying to write in the file: ' + err);
+                                        else {
+                                            serverStartFunction();
+                                        }
+                                    });
+                                } else { // fail (false)
+                                    console.log(statusCodeMessage.statusCodeGenerator(statusCode) + '\n');
+                                    console.log('Please restart server...');
+                                }
+                            });
+                        } else {
+                            serverStartFunction();
+                        }
+                    }
+                }); */
             }
         });
     }
@@ -122,6 +125,11 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                 }
             });
         }, // Fiware resource retrieve
+
+        /**************************************
+         * When these procedures are finished perfectly; AE → Container → contentInstance → Subscription
+         *
+         */
 
         // oneM2M Resource registration and subscription
         function(detailFiwareDeviceInfo, resultCallback) {
@@ -181,6 +189,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                             console.log('nodeCount is stored in nodeCount.json');
                                     });
 
+                                    // Storing the subscription IDs that is used for distinct the subscription
                                     fs.appendFile('subscriptionList.txt', subscriptionID, function (err) {
                                         if (err)
                                             console.log('FATAL An error occurred trying to write in the file: ' + err);
@@ -217,16 +226,18 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
     ], function (statusCode, result) { // response to client such as web or postman
         console.log(statusCodeMessage.statusCodeGenerator((statusCode)));
 
+        // This function is implemented for sending device count to MMG Manager
         /*if(statusCode == 201) {
             sendingNodeCount.FIWARENodeCountExecution(connectedDeviceList, function (statusCode) {
                 response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
             });
         }*/
+
         response.status(statusCode).send(statusCodeMessage.statusCodeGenerator(statusCode));
     });
 });
 
-// Getting FIWARE device list
+// Getting FIWARE device list, This function is executed by MMG manager.
 app.post('/getFiwareDeviceList', function (request, response) {
 
     var fiwareQueryInfo = request.body['FiwareQueryInfo']; // Root
@@ -248,16 +259,17 @@ app.post('/FiwareNotificationEndpoint', function(request, response) {
     console.log("Receiving notification messages from FIWARE");
 
     oneM2MController.updateFiwareToOneM2M(request.body, function (requestResult, statusCode) {
-        // In this function we don't use requestResult
+        // In this function, CAG needn't status code on the web page
         console.log(statusCodeMessage.statusCodeGenerator(statusCode));
     });
 });
 
 // Server testing code
 app.get('/', function (request, response) {
-    response.send('<h1>'+ connectedDeviceList + '</h1>');
+    response.send('<h1>'+ 'Context-Aware auxiliary component' + '</h1>');
 });
 
+// Creating Server object
 var serverStartFunction = function( ) {
     // Server start!!
     app.listen(62590, function () {
@@ -265,7 +277,7 @@ var serverStartFunction = function( ) {
     });
 };
 
-// Entity Container
+// FIWARE Entity Container
 function Entity( ) {
     // Pair Value
     this.entityName = []; // Mandatory field

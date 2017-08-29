@@ -8,8 +8,9 @@ var requestToAnotherServer = require('request');
 var unsubscriptionFiwareDevice = function (subscriptionID, fiwareCallback) {
 
     var targetURL = fiwareIP + '/v2/subscriptions/' + subscriptionID;
+    console.log("Target URL :" + targetURL);
 
-    // Unsubscribing fiware devices
+    // Unsubscribing FIWARE device
     requestToAnotherServer( { url : targetURL,
         method : 'DELETE',
         strictSSL: false,

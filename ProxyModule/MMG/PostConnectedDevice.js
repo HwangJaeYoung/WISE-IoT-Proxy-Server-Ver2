@@ -1,8 +1,4 @@
 /**
- * Created by JaeYoungHwang on 2017-06-30.
- */
-
-/**
  * Created by JaeYoungHwang on 2017-03-03.
  * forest62590@gmail.com
  */
@@ -10,9 +6,11 @@
 var requestToAnotherServer = require('request');
 var bodyGenerator = require('../Domain/BodyGenerator');
 
+// This function is used for sending device count to MMG manager.
 var sendingFIWARENodeCount = function (fiwareNodeCount, callBackForResponse) {
 
     var targetURL = MMGURL, bodyObject = null;
+    console.log("Target URL :" + targetURL);
 
     bodyObject = bodyGenerator.nodeCountBodyGenerator(fiwareNodeCount);
 
@@ -20,7 +18,7 @@ var sendingFIWARENodeCount = function (fiwareNodeCount, callBackForResponse) {
         url: targetURL,
         method: 'POST',
         json: true,
-        headers: { // Basic AE resource structure for registration
+        headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
@@ -30,11 +28,9 @@ var sendingFIWARENodeCount = function (fiwareNodeCount, callBackForResponse) {
 
             var statusCode = nodeCountResponse.statusCode;
 
-            if (statusCode == 201) { // resource creation
+            if (statusCode == 200) { // success
                 callBackForResponse(statusCode); // Callback method for sending QueryEntity result to FiwareController
             } else if(statusCode == 400) { // bad request
-                callBackForResponse(statusCode);
-            } else if (statusCode == 409) { // resource conflict error
                 callBackForResponse(statusCode);
             } // Status code will be added later
         } else { // For example, Request Timeout

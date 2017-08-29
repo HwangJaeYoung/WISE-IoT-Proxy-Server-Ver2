@@ -88,7 +88,7 @@ var iterationEntityUnsubscription = function(subscriptionIDArray, fiwareControll
             // Checking for iteration
             unsubFiwareDeviceFunction.unsubFiwareDevice(subscriptionIDArray[count], function(statusCode) {
                 // Unsubscribing operation success
-                if(statusCode == 204) {
+                if(statusCode == 204) { // No Content
                     count++; async_for_loop_callback(null, count);
                 } else {  // Unsubscribing operation fail
                     async_for_loop_callback(statusCode);
@@ -96,9 +96,9 @@ var iterationEntityUnsubscription = function(subscriptionIDArray, fiwareControll
             });
         },
         function (statusCode, n) {
-            if (statusCode) {
+            if (statusCode) { // fail
                 fiwareControllerCallback(false, statusCode);
-            } else {
+            } else { // success
                 console.log("Fiware Device Unsubscription is finished");
                 fiwareControllerCallback(true, statusCode);
             }
@@ -115,7 +115,6 @@ exports.executeQueryEntitySimple = function(fiwareIPAddr, fiwareEntityType, fiwa
 };
 
 exports.executeSubscriptionEntity = function (count, fiwareDeviceInfo, fiwareControllerCallback) {
-    console.log("ADSfadsf1");
     iterationEntitySubscription(count, fiwareDeviceInfo, fiwareControllerCallback);
 };
 

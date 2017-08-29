@@ -8,14 +8,12 @@ var bodyGenerator = require('../Domain/BodyGenerator');
 
 var subscriptionFiwareDevice = function (device, fiwareCallback) {
 
-    console.log("ADSfadsf");
-
     var targetURL = fiwareIP + '/v2/subscriptions';
     var bodyObject = bodyGenerator.fiwareSubscriptionBodyGenerator(device);
 
-    console.log(bodyObject);
+    console.log("Target URL :" + targetURL);
 
-    // Request for subscribing fiware device information from ContextBroker (Subscription Entity)
+    // Request for subscribing FIWARE device information from ContextBroker (Subscription Entity)
     requestToAnotherServer( { url : targetURL,
         method : 'POST',
         strictSSL: false,
@@ -29,7 +27,8 @@ var subscriptionFiwareDevice = function (device, fiwareCallback) {
         if(typeof(fiwareResponse) !== 'undefined') {
             var statusCode = fiwareResponse.statusCode;
 
-            if (statusCode == 201) { // resource creation
+            if (statusCode == 201) { // subscription success
+                // Parsing subscriptionID.
                 var headerLocationSplit = fiwareResponse.headers.location.split("/");
                 var subscriptionID = headerLocationSplit[headerLocationSplit.length - 1];
                 fiwareCallback(statusCode, subscriptionID);
@@ -37,7 +36,7 @@ var subscriptionFiwareDevice = function (device, fiwareCallback) {
                 fiwareCallback(statusCode, null);
             } else if (statusCode == 409) { // resource conflict error
                 fiwareCallback(statusCode, null);
-            }
+            } // Status code will be added later
         } else { // For example, Request Timeout
             if(error.code === 'ETIMEDOUT') // request timeout
                 fiwareCallback(408, null);

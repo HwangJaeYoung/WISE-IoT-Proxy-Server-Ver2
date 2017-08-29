@@ -11,8 +11,8 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
     var targetURL = '', bodyObject = null;
 
     targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot/' + parkingSpotContainerName + '/' + subContainerName;
-
     console.log("targetURL:" + targetURL);
+
     bodyObject = bodyGenerator.contentInstanceBodyGenerator(contentInstanceName, contentInstanceValue);
 
     requestToAnotherServer({
@@ -23,7 +23,7 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
             'Accept': 'application/json',
             'X-M2M-RI': '12345',
             'X-M2M-Origin': 'Origin',
-            'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
+            'Content-Type': 'application/json;ty=4'
         },
         body: bodyObject
     }, function (error, oneM2MResponse, body) {
