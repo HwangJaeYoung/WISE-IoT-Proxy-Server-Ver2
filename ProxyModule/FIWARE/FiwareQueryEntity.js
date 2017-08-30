@@ -64,6 +64,7 @@ var gettingDeviceInfo = function (EntityName, EntityType, fiwareCallback) {
                         resultObject[attrKeys[i]] = attributeTypeValues;
                     }
                 }
+                console.log(JSON.stringify(resultObject));
                 fiwareCallback(statusCode, resultObject); // Callback method for sending QueryEntity result to FiwareController
             } else if (statusCode == 404) { // resource not found
                 fiwareCallback(statusCode, null);

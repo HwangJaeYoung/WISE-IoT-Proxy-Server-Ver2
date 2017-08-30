@@ -25,26 +25,11 @@ var ContainerBodyGeneration = function (ContainerName) {
     return bodyObject;
 };
 
-var contentInstanceBodyGeneration = function (contentInstanceName, contentInstanceValue) {
+var contentInstanceBodyGeneration = function (device) {
     var bodyObject = new Object();
     var rootForAttr = new Object();
 
-    var cur_d = new Date();
-    var msec = '';
-
-    if((parseInt(cur_d.getMilliseconds(), 10) < 10)) {
-        msec = ('00' + cur_d.getMilliseconds());
-    } else if((parseInt(cur_d.getMilliseconds(), 10) < 100)) {
-        msec = ('0' + cur_d.getMilliseconds());
-    } else {
-        msec = cur_d.getMilliseconds();
-    }
-
-    contentInstanceName =  contentInstanceName + cur_d.toISOString().replace(/-/, '').replace(/-/, '').replace(/T/, '').replace(/:/, '').replace(/:/, '').replace(/\..+/, '') + msec + randomValueBase64(4);
-
-    console.log('Value : ' + contentInstanceValue);
-    rootForAttr['con'] = contentInstanceValue;
-    rootForAttr['rn'] = contentInstanceName;
+    rootForAttr['con'] =  device['status'].value;
     bodyObject['m2m:cin'] = rootForAttr;
 
     return bodyObject;
@@ -136,16 +121,28 @@ var contentInstanceBodyGenerationForJSON = function (device) {
     var bodyObject = new Object();
 
     for(var attrCount = 0; attrCount < attributeCount; attrCount++) {
+        if (attributeKey[attrCount] == "dateModified" || attributeKey[attrCount] == "status")
+            continue;
 
-        var findingLocationType = device[attributeKey[attrCount]].type;
+        if(device[attributeKey[attrCount]].type) {
+            var findingLocationType = device[attributeKey[attrCount]].type;
 
-        
-        if(findingLocationType == 'geo:json') {
-            bodyObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;
-        } else {
-            var attrObject = new Object();
-            // attrObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;// contentInstance value
-            bodyObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;
+            if (findingLocationType == 'geo:json') {
+                bodyObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;
+            } else {
+                // attrObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;// contentInstance value
+                bodyObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;
+            }
+        } else if (attributeKey[attrCount] == "entityName" || attributeKey[attrCount] == "entityType") {
+            if(attributeKey[attrCount] == "entityName")
+                bodyObject["id"] = device['entityName'];
+            else if (attributeKey[attrCount] == "entityType")
+                bodyObject["type"] = device['entityType'];
+        } else if (attributeKey[attrCount] == "id" || attributeKey[attrCount] == "type") {
+            if(attributeKey[attrCount] == "id")
+                bodyObject[attributeKey[attrCount]] = device['id'];
+            else if (attributeKey[attrCount] == "type")
+                bodyObject[attributeKey[attrCount]] = device['type'];
         }
     }
 
@@ -155,7 +152,6 @@ var contentInstanceBodyGenerationForJSON = function (device) {
     contentObject['con'] = bodyObject;
     rootForAttr['m2m:cin'] = contentObject;
 
-    console.log(JSON.stringify(rootForAttr));
     return rootForAttr;
 };
 
@@ -183,6 +179,10 @@ exports.contentInstanceBodyGenerator = function(contentInstanceName, contentInst
 };
 
 exports.contentInstanceBodyGeneratorForJSON = function (device) {
+    return contentInstanceBodyGenerationForJSON(device);
+};
+
+exports.simpleContentInstanceBodyGeneratorForJSON = function (device) {
     return contentInstanceBodyGenerationForJSON(device);
 };
 

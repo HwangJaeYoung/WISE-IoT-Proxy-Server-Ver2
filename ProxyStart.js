@@ -105,7 +105,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
 
     if(selectedDevices.notificationIPAddr) {
         notificationURL = selectedDevices.notificationIPAddr;
-        notificationURL += '/FiwareNotificationEndpoint';
+        notificationURL += "/FiwareNotificationEndpoint";
     }
 
     var fiwareDeviceInfo = new Entity( ); // Device information container
@@ -174,7 +174,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                         // ContextBroker subscription
                         function(detailFiwareDeviceInfo, CallbackForSubscriptionRegistration) {
 
-                            /*fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
+                            fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
                                 if(requestResult) { // Subscription Registration success
 
                                     connectedDeviceList++;
@@ -202,7 +202,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                 } else { // Subscription Registration fail
                                     CallbackForSubscriptionRegistration(statusCode, null);
                                 }
-                            })*/
+                            })
                         }
                     ], function (statusCode, result) { // response to client such as web or postman
                         if(statusCode) { // AE → Container → contentInstance → Subscription (fail)
@@ -259,6 +259,8 @@ app.post('/getFiwareDeviceList', function (request, response) {
 app.post('/FiwareNotificationEndpoint', function(request, response) {
 
     console.log("Receiving notification messages from FIWARE");
+
+    console.log(JSON.stringify(request.body));
 
     oneM2MController.updateFiwareToOneM2M(request.body, function (requestResult, statusCode) {
         // In this function, CAG needn't status code on the web page

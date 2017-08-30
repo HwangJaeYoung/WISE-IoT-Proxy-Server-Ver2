@@ -5,6 +5,8 @@
 
 var requestToAnotherServer = require('request');
 var bodyGenerator = require('../Domain/BodyGenerator');
+const INFO = "info";
+const STATUS = "status";
 
 var RegistrationExecution = function (parkingSpotContainerName, subContainerName, device, callBackForResponse) {
 
@@ -13,7 +15,10 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
     targetURL = yellowTurtleIP + '/Mobius/iotParking/parkingSpot/' + parkingSpotContainerName + '/' + subContainerName;
     console.log("targetURL:" + targetURL);
 
-    bodyObject = bodyGenerator.contentInstanceBodyGeneratorForJSON(device);
+    if (subContainerName == INFO)
+        bodyObject = bodyGenerator.contentInstanceBodyGeneratorForJSON(device);
+    else if (subContainerName == STATUS)
+        bodyObject = bodyGenerator.contentInstanceBodyGenerator(device);
 
     requestToAnotherServer({
         url: targetURL,
@@ -30,6 +35,7 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
 
         if(typeof(oneM2MResponse) !== 'undefined') {
             var statusCode = oneM2MResponse.statusCode;
+            console.log(statusCode);
 
             if (statusCode == 201) { // resource creation
                 callBackForResponse(statusCode);
