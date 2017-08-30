@@ -103,8 +103,10 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
     if(selectedDevices.mobiusServerIPAddr)
         yellowTurtleIP = selectedDevices.mobiusServerIPAddr;
 
-    if(selectedDevices.notificationIPAddr)
+    if(selectedDevices.notificationIPAddr) {
         notificationURL = selectedDevices.notificationIPAddr;
+        notificationURL += '/FiwareNotificationEndpoint';
+    }
 
     var fiwareDeviceInfo = new Entity( ); // Device information container
 

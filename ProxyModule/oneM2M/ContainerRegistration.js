@@ -11,10 +11,10 @@ var RegistrationExecution = function (containerName, subContainerName, callBackF
     var targetURL = '', bodyObject = null;
 
     if(subContainerName) { // Double Container format
-        targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot/'  + containerName;
+        targetURL = yellowTurtleIP + '/Mobius/iotParking/parkingSpot/'  + containerName;
         bodyObject = bodyGenerator.ContainerBodyGenerator(subContainerName);
     } else { // General Container format
-        targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot';
+        targetURL = yellowTurtleIP + '/Mobius/iotParking/parkingSpot';
         bodyObject = bodyGenerator.ContainerBodyGenerator(containerName);
     }
 

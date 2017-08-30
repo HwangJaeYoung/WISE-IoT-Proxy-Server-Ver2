@@ -139,21 +139,24 @@ var contentInstanceBodyGenerationForJSON = function (device) {
 
         var findingLocationType = device[attributeKey[attrCount]].type;
 
+        
         if(findingLocationType == 'geo:json') {
-            var attrObject = new Objecct();
-            // var Location = device[attributeKey[attrCount]].value;
-            // var coordinates = Location.coordinates;
-            // attrObject[attributeKey[attrCount]] = coordinates[0] + ":" + coordinates[1];
-            attrObject[attributeKey[attrCount]] = device[attributeKey[attrCount]]
-            bodyObject = new attrObject;
+            bodyObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;
         } else {
-            var attrObject = new Objecct();
-            attrObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;// contentInstance value
-            bodyObject = new attrObject;
+            var attrObject = new Object();
+            // attrObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;// contentInstance value
+            bodyObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;
         }
     }
 
-    return bodyObject;
+    var rootForAttr = new Object();
+    var contentObject = new Object();
+
+    contentObject['con'] = bodyObject;
+    rootForAttr['m2m:cin'] = contentObject;
+
+    console.log(JSON.stringify(rootForAttr));
+    return rootForAttr;
 };
 
 var generatingNodeCountBody = function (nodeCount) {

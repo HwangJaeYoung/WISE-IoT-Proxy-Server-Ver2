@@ -10,10 +10,10 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
 
     var targetURL = '', bodyObject = null;
 
-    targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot/' + parkingSpotContainerName + '/' + subContainerName;
+    targetURL = yellowTurtleIP + '/Mobius/iotParking/parkingSpot/' + parkingSpotContainerName + '/' + subContainerName;
     console.log("targetURL:" + targetURL);
 
-    bodyObject = bodyGenerator.contentInstanceBodyGenerator(device);
+    bodyObject = bodyGenerator.contentInstanceBodyGeneratorForJSON(device);
 
     requestToAnotherServer({
         url: targetURL,
