@@ -172,7 +172,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                         // ContextBroker subscription
                         function(detailFiwareDeviceInfo, CallbackForSubscriptionRegistration) {
 
-                            fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
+                            /*fiwareController.executeSubscriptionEntity(count, detailFiwareDeviceInfo, function (requestResult, statusCode, subscriptionID) {
                                 if(requestResult) { // Subscription Registration success
 
                                     connectedDeviceList++;
@@ -200,7 +200,7 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
                                 } else { // Subscription Registration fail
                                     CallbackForSubscriptionRegistration(statusCode, null);
                                 }
-                            })
+                            })*/
                         }
                     ], function (statusCode, result) { // response to client such as web or postman
                         if(statusCode) { // AE → Container → contentInstance → Subscription (fail)

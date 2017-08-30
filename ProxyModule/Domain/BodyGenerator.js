@@ -132,12 +132,29 @@ var contentInstanceBodyGenerationForJSON = function (device) {
     var attributeKey = Object.keys(device);
     var attributeCount = attributeKey.length;
 
+    // Root JSON Object
+    var bodyObject = new Object();
 
+    for(var attrCount = 0; attrCount < attributeCount; attrCount++) {
 
+        var findingLocationType = device[attributeKey[attrCount]].type;
 
-}
+        if(findingLocationType == 'geo:json') {
+            var attrObject = new Objecct();
+            // var Location = device[attributeKey[attrCount]].value;
+            // var coordinates = Location.coordinates;
+            // attrObject[attributeKey[attrCount]] = coordinates[0] + ":" + coordinates[1];
+            attrObject[attributeKey[attrCount]] = device[attributeKey[attrCount]]
+            bodyObject = new attrObject;
+        } else {
+            var attrObject = new Objecct();
+            attrObject[attributeKey[attrCount]] = device[attributeKey[attrCount]].value;// contentInstance value
+            bodyObject = new attrObject;
+        }
+    }
 
-
+    return bodyObject;
+};
 
 var generatingNodeCountBody = function (nodeCount) {
     var bodyObject = new Object();
