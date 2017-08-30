@@ -6,14 +6,14 @@
 var requestToAnotherServer = require('request');
 var bodyGenerator = require('../Domain/BodyGenerator');
 
-var RegistrationExecution = function (parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse) {
+var RegistrationExecution = function (parkingSpotContainerName, subContainerName, device, callBackForResponse) {
 
     var targetURL = '', bodyObject = null;
 
     targetURL = yellowTurtleIP + '/mobius-yt/iotParking/parkingSpot/' + parkingSpotContainerName + '/' + subContainerName;
     console.log("targetURL:" + targetURL);
 
-    bodyObject = bodyGenerator.contentInstanceBodyGenerator(contentInstanceName, contentInstanceValue);
+    bodyObject = bodyGenerator.contentInstanceBodyGenerator(device);
 
     requestToAnotherServer({
         url: targetURL,
@@ -43,6 +43,6 @@ var RegistrationExecution = function (parkingSpotContainerName, subContainerName
     });
 };
 
-exports.contentInstanceRegistrationExecution = function(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse) {
-    RegistrationExecution(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse);
+exports.contentInstanceRegistrationExecution = function(parkingSpotContainerName, subContainerName, device, callBackForResponse) {
+    RegistrationExecution(parkingSpotContainerName, subContainerName, device, callBackForResponse);
 };

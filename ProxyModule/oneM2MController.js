@@ -38,80 +38,42 @@ var executeRegistrationConCin = function(count, fiwareInformation, oneM2MControl
     parkingSpotContainerName = parkingSpotContainerName.replace(/:/g, ".");
 
     async.waterfall([
-        // status container registration
+        // status container registration (Fixed container name: status)
         function(CallbackForContainerRegistration){
             containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, 'status', function (statusCode) {
-                if(statusCode == 201)
+                if(statusCode == 201) // Resource creation success
                     CallbackForContainerRegistration(null);
-                else
+                else // fail
                     CallbackForContainerRegistration(statusCode, null);
             });
         },
 
-        // info container registration
+        // info container registration (Fixed container name: info)
+        // In this container, all relevant information is stored such as id, type, location and so on.
         function(CallbackForContainerRegistration) {
             containerRegistration.ContainerRegistrationExecution(parkingSpotContainerName, 'info', function (statusCode) {
-                if(statusCode == 201)
+                if(statusCode == 201) // Resource creation success
                     CallbackForContainerRegistration(null);
-                else
+                else // fail
                     CallbackForContainerRegistration(statusCode, null);
             });
         },
 
-        // contentsInstance registration for spot and info container
+        // contentsInstance registration for info container
         function(CallbackForConCinRegistration) {
-
-            var attrCount = 0;
-
-            // Getting device attributes such as entityName, temperature, pressure and so on.
-            var attributeKey = Object.keys(device);
-            var attributeCount = attributeKey.length;
-
-            async.whilst(
-                function () { return attrCount < attributeCount },
-
-                function (async_for_loop_callback) {
-
-                    var contentInstanceName = '', contentInstanceValue = '', subContainerName = '';
-                    var findingLocationType = device[attributeKey[attrCount]].type;
-
-                    contentInstanceName = attributeKey[attrCount];
-                    console.log("cinName: " + contentInstanceName);
-
-                    if(contentInstanceName == 'entityName' || contentInstanceName =='entityType') {
-                        attrCount++; async_for_loop_callback();
-                    } else {
-                        if(findingLocationType == 'geo:json') {
-                            var Location = device[attributeKey[attrCount]].value;
-                            var coordinates = Location.coordinates;
-                            contentInstanceValue = coordinates[0] + ":" + coordinates[1];
-                        } else {
-                            contentInstanceValue = device[attributeKey[attrCount]].value;// contentInstance value
-                        }
-
-                        if(contentInstanceName == 'status')
-                            subContainerName = 'status';
-                        else
-                            subContainerName = 'info';
-
-                        console.log(parkingSpotContainerName + ", " + subContainerName + ", "+  contentInstanceName + ", " +  contentInstanceValue);
-
-                        contentInstanceRegistration.contentInstanceRegistrationExecution(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, function (statusCode) {
-                            if (statusCode == 201) {
-                                attrCount++; async_for_loop_callback();
-                            } else
-                                async_for_loop_callback(statusCode, null);
-                        });
-                    }
-                },
-                function (statusCode, n) {
-                    if(statusCode) {
-                        CallbackForConCinRegistration(statusCode, null); // fail
-                    } else {
-                        CallbackForConCinRegistration(null); // success
-                    }
+            // RegistrationExecution(parkingSpotContainerName, subContainerName, contentInstanceName, contentInstanceValue, callBackForResponse);
+            contentInstanceRegistration.contentInstanceRegistrationExecution(parkingSpotContainerName, 'info', device, function (statusCode) {
+                if(statusCode == 201) // Resource creation success
+                    CallbackForConCinRegistration(null);
+                else // fail
+                    CallbackForConCinRegistration(statusCode, null);
                 }
-            ); // End of async.whilist
+            )
+        },
+
+        // contentsInstance registration for spot container
+        function (CallbackForConCinRegistration) {
+
         }
     ], function (statusCode, result) { // response to client such as web or postman
         if (statusCode) {

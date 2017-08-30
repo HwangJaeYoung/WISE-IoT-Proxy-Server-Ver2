@@ -127,8 +127,8 @@ app.post('/MMGDeviceInfoEndpoint', function(request, response) {
         }, // Fiware resource retrieve
 
         /**************************************
-         * When these procedures are finished perfectly; AE → Container → contentInstance → Subscription
-         *
+         * When these procedures are finished perfectly; AE → Container → contentInstance → Subscription (to FIWARE)
+         * CAG will show the success messages. if not it will show error messages.
          */
 
         // oneM2M Resource registration and subscription

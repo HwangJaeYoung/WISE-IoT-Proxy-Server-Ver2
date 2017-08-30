@@ -111,6 +111,34 @@ var subscriptionBodyGenerator = function (device) {
     return bodyObject;
 };
 
+/*************************************************************************************
+    * contentInstanceBodyGenerationForJSON function will generate body form as follows.
+    {
+        "id": "busan.parkingSpot.sensor522",
+        "type": "ParkingSpot",
+        "name": "sensor522",
+        "location": {
+	        "type": "Point",
+	        "coordinates": [35.17, 129.17]
+        },
+        "refParkingSite": "busan.offStreetParking.jwadongmunhwawon",
+        "category": ["offstreet"]
+    }
+ **************************************************************************************/
+
+var contentInstanceBodyGenerationForJSON = function (device) {
+
+    // Getting device attributes such as id, type, location and so on.
+    var attributeKey = Object.keys(device);
+    var attributeCount = attributeKey.length;
+
+
+
+
+}
+
+
+
 var generatingNodeCountBody = function (nodeCount) {
     var bodyObject = new Object();
 
@@ -134,12 +162,16 @@ exports.contentInstanceBodyGenerator = function(contentInstanceName, contentInst
     return contentInstanceBodyGeneration(contentInstanceName, contentInstanceValue);
 };
 
+exports.contentInstanceBodyGeneratorForJSON = function (device) {
+    return contentInstanceBodyGenerationForJSON(device);
+};
+
 // FIWARE Body Generator
 exports.fiwareSubscriptionBodyGenerator = function (device) {
     return subscriptionBodyGenerator(device);
 };
 
-// Node count Generator
+// Node count Body Generator
 exports.nodeCountBodyGenerator = function (nodeCount) {
     return generatingNodeCountBody(nodeCount);
 };
